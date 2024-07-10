@@ -1,0 +1,466 @@
+<html><head><title>StudentConnect - Enhanced Messaging System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    
+      :root {
+        --primary-color: #1a73e8;
+        --secondary-color: #34a853;
+        --background-color: #f0f2f5;
+        --card-color: #ffffff;
+        --text-color: #202124;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+      }
+    
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--background-color);
+        margin: 0;
+        padding: 20px;
+        color: var(--text-color);
+        transition: background-color 0.3s ease;
+      }
+    
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: var(--card-color);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px var(--shadow-color);
+        transition: all 0.3s ease;
+      }
+    
+      h1, h2 {
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+      }
+    
+      h2 {
+        font-size: 24px;
+        font-weight: 500;
+      }
+    
+      .search-container, .message-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+    
+      input, textarea {
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+    
+      input:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      }
+    
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+      }
+    
+      button:hover {
+        background-color: #1967d2;
+      }
+    
+      button:active {
+        transform: scale(0.98);
+      }
+    
+      #messageAllBtn, #exportLogsBtn {
+        background-color: var(--secondary-color);
+        width: 100%;
+        margin-top: 10px;
+      }
+    
+      #messageAllBtn:hover, #exportLogsBtn:hover {
+        background-color: #2d8d47;
+      }
+    
+      .profile-card, .message-logs {
+        background-color: var(--card-color);
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px var(--shadow-color);
+        transition: all 0.3s ease;
+      }
+    
+      .profile-card:hover, .message-logs:hover {
+        box-shadow: 0 4px 8px var(--shadow-color);
+        transform: translateY(-2px);
+      }
+    
+      .profile-card h2 {
+        margin-top: 0;
+        font-size: 22px;
+        color: var(--primary-color);
+      }
+    
+      .profile-card p, .message-logs p {
+        margin: 10px 0;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+    
+      .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+    
+      .action-buttons button {
+        width: 48%;
+      }
+    
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    
+      .fade-in {
+        animation: fadeIn 0.5s ease forwards;
+      }
+    
+      @media (max-width: 480px) {
+        .container {
+          padding: 20px;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        h2 {
+          font-size: 20px;
+        }
+        input, textarea, button {
+          font-size: 14px;
+        }
+      }
+      #clearLogsBtn {
+  background-color: #dc3545;
+  width: 100%;
+  margin-top: 10px;
+}
+
+#clearLogsBtn:hover {
+  background-color: #c82333;
+}
+    </style>
+    </head>
+    <body>
+    <div class="container fade-in">
+      <h1>StudentConnect</h1>
+      
+      <div class="search-container">
+        <input type="text" id="rollNumber" placeholder="Enter Roll Number">
+        <button id="searchBtn">Search</button>
+      </div>
+    
+      <div id="profileCard" class="profile-card" style="display:none;">
+        <h2 id="studentName"></h2>
+        <p><strong>Roll Number:</strong> <span id="studentRoll"></span></p>
+        <p><strong>Email:</strong> <span id="studentEmail"></span></p>
+        <p><strong>Parent Phone:</strong> <span id="parentPhone"></span></p>
+        <div class="action-buttons">
+          <button onclick="callParent()">Call Parent</button>
+          <button onclick="showMessageForm()">Message Parent</button>
+        </div>
+      </div>
+    
+      <div id="messageForm" class="message-form" style="display:none;">
+        <h2>Send Message</h2>
+        <textarea id="messageContent" rows="4" placeholder="Enter your message"></textarea>
+        <div class="action-buttons">
+          <button onclick="saveMessage()">Save</button>
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    
+      <button id="messageAllBtn" onclick="showBulkMessageForm()">Message All Parents</button>
+      
+      <div id="bulkMessageForm" class="message-form" style="display:none;">
+        <h2>Bulk Message</h2>
+        <textarea id="bulkMessageContent" rows="4" placeholder="Enter message for all parents"></textarea>
+        <div class="action-buttons">
+          <button onclick="saveBulkMessage()">Save</button>
+          <button onclick="sendBulkMessage()">Send Message</button>
+        </div>
+      </div>
+    
+      <button id="exportLogsBtn" onclick="exportMessageLogs()">Export Message Logs</button>
+    
+      <div class="message-logs">
+        <h2>Recent Message Logs</h2>
+        <div id="messageLogs"></div>
+        <button id="clearLogsBtn" onclick="clearAllLogs()">Clear All Logs</button>
+      </div>
+      
+    </div>
+    
+    <script>
+    const students = [
+      { rollNumber: '22WJ1A04T1', name: 'SHAIK ABDUL ALEEM', email: 'abdul.aleem@studentconnect.edu', parentPhone: '7672029401' },
+      { rollNumber: '22WJ1A04T2', name: 'Diya Sharma', email: 'diya.sharma@studentconnect.edu', parentPhone: '9876543211' },
+      { rollNumber: '22WJ1A04T3', name: 'Arjun Singh', email: 'arjun.singh@studentconnect.edu', parentPhone: '9876543212' },
+      // ... more student objects ...
+    ];
+    
+    let messageLogs = [];
+    
+    // Simulated server-side database
+    const localStorageDatabase = {
+  saveMessage: function(log) {
+    let messages = JSON.parse(localStorage.getItem('messageLogs')) || [];
+    messages.push(log);
+    this.cleanupOldMessages(messages);
+    localStorage.setItem('messageLogs', JSON.stringify(messages));
+  },
+  getAllMessages: function() {
+    return JSON.parse(localStorage.getItem('messageLogs')) || [];
+  },
+  cleanupOldMessages: function(messages) {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    const filteredMessages = messages.filter(log => new Date(log.timestamp) > oneMonthAgo);
+    localStorage.setItem('messageLogs', JSON.stringify(filteredMessages));
+  },
+  clearAllLogs: function() {
+    localStorage.removeItem('messageLogs');
+  }
+};
+    // Fetch messages from the server when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchMessagesFromServer();
+    });
+    
+    function fetchMessagesFromServer() {
+  messageLogs = localStorageDatabase.getAllMessages();
+  updateMessageLogs();
+}
+    
+    document.getElementById('searchBtn').addEventListener('click', function() {
+      const rollNumber = document.getElementById('rollNumber').value;
+      const student = students.find(s => s.rollNumber === rollNumber);
+      const profileCard = document.getElementById('profileCard');
+    
+      if (student) {
+        document.getElementById('studentName').textContent = student.name;
+        document.getElementById('studentRoll').textContent = student.rollNumber;
+        document.getElementById('studentEmail').textContent = student.email;
+        document.getElementById('parentPhone').textContent = student.parentPhone;
+        profileCard.style.display = 'block';
+        profileCard.classList.add('fade-in');
+      } else {
+        alert('Student not found. Please check the roll number and try again.');
+        profileCard.style.display = 'none';
+      }
+    });
+    
+    function callParent() {
+      const phoneNumber = document.getElementById('parentPhone').textContent;
+      window.location.href = `tel:${phoneNumber}`;
+    }
+    
+    function showMessageForm() {
+      const messageForm = document.getElementById('messageForm');
+      messageForm.style.display = 'block';
+      messageForm.classList.add('fade-in');
+    }
+    
+    function saveMessage() {
+      const message = document.getElementById('messageContent').value;
+      
+      if (message.trim() === '') {
+        alert('Please enter a message.');
+        return;
+      }
+    
+      const log = {
+        sender: 'Faculty',
+        recipient: document.getElementById('parentPhone').textContent,
+        message: message,
+        timestamp: new Date().toISOString(),
+        status: 'saved'
+      };
+      
+      localStorageDatabase.saveMessage(log);
+  fetchMessagesFromServer();
+    
+      alert('Message saved successfully');
+    }
+    
+    function sendMessage() {
+      const parentPhone = document.getElementById('parentPhone').textContent;
+      const message = document.getElementById('messageContent').value;
+      
+      if (message.trim() === '') {
+        alert('Please enter a message.');
+        return;
+      }
+    
+      // Open SMS app with pre-filled message for individual parent
+      window.location.href = `sms:${parentPhone}?body=${encodeURIComponent(message)}`;
+    
+      const log = {
+        sender: 'Faculty',
+        recipient: parentPhone,
+        message: message,
+        timestamp: new Date().toISOString(),
+        status: 'sent'
+      };
+      serverDatabase.saveMessage(log);
+      fetchMessagesFromServer();
+    
+      document.getElementById('messageContent').value = '';
+      localStorageDatabase.saveMessage(log);
+      fetchMessagesFromServer();
+    }
+    
+    function showBulkMessageForm() {
+  const bulkMessageForm = document.getElementById('bulkMessageForm');
+  document.getElementById('bulkMessageContent').value = ''; // Clear previous message
+  bulkMessageForm.style.display = 'block';
+  bulkMessageForm.classList.add('fade-in');
+}
+    
+    function saveBulkMessage() {
+  const message = document.getElementById('bulkMessageContent').value;
+  
+  if (message.trim() === '') {
+    alert('Please enter a message.');
+    return;
+  }
+
+  // Save a bulk message log for each student
+  students.forEach(student => {
+    const log = {
+      sender: 'Faculty',
+      recipient: student.parentPhone,
+      message: message,
+      timestamp: new Date().toISOString(),
+      status: 'saved (bulk)'
+    };
+    localStorageDatabase.saveMessage(log);
+  });
+
+  fetchMessagesFromServer();
+  updateMessageLogs();
+
+  alert('Bulk message saved successfully');
+}
+    
+    function sendBulkMessage() {
+      const message = document.getElementById('bulkMessageContent').value;
+      
+      if (message.trim() === '') {
+        alert('Please enter a message.');
+        return;
+      }
+    
+      // Prepare bulk SMS
+      const phoneNumbers = students.map(student => student.parentPhone).join(',');
+      
+      // Open SMS app with pre-filled message for bulk sending
+      window.location.href = `sms:${phoneNumbers}?body=${encodeURIComponent(message)}`;
+    
+      // Simulating sending bulk SMS and storing logs
+      students.forEach(student => {
+        const log = {
+          sender: 'Faculty',
+          recipient: student.parentPhone,
+          message: message,
+          timestamp: new Date().toISOString(),
+          status: 'sent'
+        };
+        localStorageDatabase.saveMessage(log);;
+      });
+      fetchMessagesFromServer();
+    
+      document.getElementById('bulkMessageContent').value = '';
+      document.getElementById('bulkMessageForm').style.display = 'none';
+    }
+    
+    function updateMessageLogs() {
+      const logsContainer = document.getElementById('messageLogs');
+      logsContainer.innerHTML = '';
+      messageLogs.slice(-5).reverse().forEach(log => {
+        const logEntry = document.createElement('p');
+        const timestamp = new Date(log.timestamp);
+        const formattedDate = `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        logEntry.textContent = `${formattedDate} - To: ${log.recipient} - Status: ${log.status}`;
+        logEntry.classList.add('fade-in');
+        logsContainer.appendChild(logEntry);
+      });
+    }
+    
+    function exportMessageLogs() {
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "Timestamp,Sender,Recipient,Message,Status\n"
+        + messageLogs.map(log => {
+            const timestamp = new Date(log.timestamp);
+            const formattedDate = `${timestamp.toLocaleDateString()} ${timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            return `${formattedDate},${log.sender},${log.recipient},"${log.message}",${log.status}`;
+          }).join("\n");
+    
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "message_logs.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // Initialize message logs
+    fetchMessagesFromServer();
+    function periodicCleanup() {
+  const messages = localStorageDatabase.getAllMessages();
+  localStorageDatabase.cleanupOldMessages(messages);
+}
+
+// Call this function every day
+setInterval(periodicCleanup, 24 * 60 * 60 * 1000);
+document.addEventListener('DOMContentLoaded', function() {
+  fetchMessagesFromServer();
+  periodicCleanup();
+});
+function clearAllLogs() {
+  if (confirm("Are you sure you want to clear all message logs? This action cannot be undone.")) {
+    localStorage.removeItem('messageLogs');
+    messageLogs = [];
+    updateMessageLogs();
+    alert("All message logs have been cleared.");
+  }
+}
+function clearAllLogs() {
+  if (confirm("Are you sure you want to clear all message logs? This action cannot be undone.")) {
+    localStorageDatabase.clearAllLogs();
+    messageLogs = [];
+    updateMessageLogs();
+    alert("All message logs have been cleared.");
+  }
+}
+    </script>
+    </body></html>
